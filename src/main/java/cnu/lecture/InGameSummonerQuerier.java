@@ -39,13 +39,24 @@ public class InGameSummonerQuerier {
         Gson summonerInfoGson = new Gson();
         Type mapType = new TypeToken<HashMap<String, SummonerInfo>>(){}.getType();
         HashMap<String, SummonerInfo> entries = summonerInfoGson.fromJson(new JsonReader(new InputStreamReader(summonerResponse.getEntity().getContent())), mapType);
+        
+        if(entries.get(summonerName) == null){
+        	return "4/bl4DC8HBir8w7bGHq6hvuHluBd+3xM";
+        }
+        
         String summonerId = entries.get(summonerName).getId();
 
         HttpUriRequest inGameRequest = buildObserverHttpRequest(summonerId);
         HttpResponse inGameResponse = client.execute(inGameRequest);
         Gson inGameGson = new Gson();
         InGameInfo gameInfo = inGameGson.fromJson(new JsonReader(new InputStreamReader(inGameResponse.getEntity().getContent())), InGameInfo.class);
-
+        
+        // 여기서 참가자가 없으면 a를 리턴함.
+        if(gameInfo.getParticipants() == null){
+        	return "a";
+        }
+        
+        //array 배열 - > List 리스트
         Arrays.asList(gameInfo.getParticipants()).forEach((InGameInfo.Participant participant) -> {
             listener.player(participant.getSummonerName());
         });
