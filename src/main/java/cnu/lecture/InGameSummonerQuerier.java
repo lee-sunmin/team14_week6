@@ -38,7 +38,7 @@ public class InGameSummonerQuerier {
         HttpResponse summonerResponse = client.execute(summonerRequest);
         Gson summonerInfoGson = new Gson();
         Type mapType = new TypeToken<HashMap<String, SummonerInfo>>(){}.getType();
-        HashMap<String, SummonerInfo> entries = summonerInfoGson.fromJson(new JsonReader(new InputStreamReader(summonerResponse.getEntity().getContent())), mapType);
+        HashMap<String, SummonerInfo> entries = summonerInfoGson.fromJson(jsonReader(summonerResponse), mapType);
         
         if(entries.get(summonerName) == null){
         	return "4/bl4DC8HBir8w7bGHq6hvuHluBd+3xM";
@@ -49,7 +49,7 @@ public class InGameSummonerQuerier {
         HttpUriRequest inGameRequest = buildObserverHttpRequest(summonerId);
         HttpResponse inGameResponse = client.execute(inGameRequest);
         Gson inGameGson = new Gson();
-        InGameInfo gameInfo = inGameGson.fromJson(new JsonReader(new InputStreamReader(inGameResponse.getEntity().getContent())), InGameInfo.class);
+        InGameInfo gameInfo = inGameGson.fromJson(jsonReader(inGameResponse), InGameInfo.class);
         
         // 여기서 참가자가 없으면 a를 리턴함.
         if(gameInfo.getParticipants() == null){
@@ -63,6 +63,10 @@ public class InGameSummonerQuerier {
 
         return gameInfo.getObservers().getEncryptionKey();
     }
+    
+    public JsonReader jsonReader(HttpResponse response) throws IOException{
+        return new JsonReader(new InputStreamReader(response.getEntity().getContent()));
+     }
 
     private HttpUriRequest buildApiHttpRequest(String summonerName) throws UnsupportedEncodingException {
         String url = mergeWithApiKey(new StringBuilder()
